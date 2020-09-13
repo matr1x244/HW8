@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketException;
+import java.net.SocketTimeoutException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -12,7 +13,7 @@ public class Server {
     private List<ClientHandler> clients;
     private AuthService authService;
 
-    private int PORT = 8189;
+    private int PORT = 8188;
     ServerSocket server = null;
     Socket socket = null;
 
@@ -22,17 +23,20 @@ public class Server {
         try {
             server = new ServerSocket(PORT);
             System.out.println("Сервер запущен");
+            //server.setSoTimeout(10000);
 
             while (true) {
-                //server.setSoTimeout(120000); // это ложит сервер если не авторизировался пользователь (socket) и уходит в цикл
+                server.setSoTimeout(10000); // это ложит сервер если не авторизировался пользователь (socket) и уходит в цикл
                 socket = server.accept();
                 System.out.println("Клиент подключился");
 
                 new ClientHandler(this, socket);
             }
 
+        } catch (SocketTimeoutException e){
+            e.printStackTrace ();
         } catch (IOException e) {
-            e.printStackTrace();
+            e.printStackTrace ();
         } finally {
             try {
                 server.close();

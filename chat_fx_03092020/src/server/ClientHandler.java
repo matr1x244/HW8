@@ -4,6 +4,7 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
+import java.net.SocketException;
 import java.net.SocketTimeoutException;
 
 public class ClientHandler {
@@ -24,11 +25,10 @@ public class ClientHandler {
 
             new Thread(() -> {
                 try {
-                    socket.setSoTimeout(120000); // это отключает если пользователь(socket) не авторизировался
+                    socket.setSoTimeout(5000); // это отключает если пользователь(socket) не авторизировался
                     //цикл аутентификации
                     while (true) {
                         String str = in.readUTF();
-
                         if (str.startsWith("/auth ")) {
                             String[] token = str.split("\\s");
                             if (token.length < 3) {
@@ -43,6 +43,7 @@ public class ClientHandler {
                                     nickname = newNick;
                                     sendMsg("/authok " + nickname);
                                     server.subscribe(this);
+                                    //socket.setSoTimeout(0);
                                     System.out.println("Клиент " + nickname + " подключился");
                                     break;
                                 } else {
@@ -73,7 +74,6 @@ public class ClientHandler {
                     //цикл работы
                     while (true) {
                         String str = in.readUTF();
-
                         if (str.startsWith("/")) {
                             System.out.println(str);
                             if (str.equals("/end")) {
